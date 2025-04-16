@@ -53,7 +53,18 @@ export const ALL_SPECIALTIES = [
   "Domestic abuse",
 ];
 
-export const getSpecialtyColor = (specialty: string) => {
-  const specialtyIndex = ALL_SPECIALTIES.indexOf(specialty);
-  return COLOR_PALETTE[specialtyIndex % COLOR_PALETTE.length];
+export function getSpecialtyInfo(specialty: string): { color: string; title: string; description: string } {
+  const index = ALL_SPECIALTIES.indexOf(specialty);
+  const color = COLOR_PALETTE[index % COLOR_PALETTE.length];
+  const [title, description] = specialty.split(/\s*\(([^)]+)\)/);
+  
+  return {
+    color,
+    title: title.trim(),
+    description: description?.trim() || ""
+  };
+}
+
+export const cleanSpecialtyTitle = (specialty: string) => {
+  return specialty.replace(/([A-Z])/g, " $1").trim();
 };

@@ -1,17 +1,18 @@
+import useSWR from 'swr';
+import type { Advocate } from '@/types/global';
 
-import { useEffect, useState } from "react";
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function useAdvocates() {
-  const [advocates, setAdvocates] = useState([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setLoading(false);
-      });
-    });
-  }, []);
+  const { data, error, isLoading } = useSWR<{ data: Advocate[] }>('/api/advocates', fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 60000,
+  });
 
-  return { advocates, loading };
+  return {
+    advocates: data?.data || [],
+    loading: isLoading,
+    error,
+  };
 }

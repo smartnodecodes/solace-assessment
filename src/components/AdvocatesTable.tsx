@@ -6,7 +6,7 @@ import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 
 import type { Advocate } from "@/types/global";
 
-import { formatPhoneNumber, getSpecialtyColor } from "@/lib/format";
+import { formatPhoneNumber, getSpecialtyInfo } from "@/lib/format";
 
 type SortDirection = "asc" | "desc" | null;
 type SortableColumn = "firstName" | "lastName" | "city" | "degree" | "yearsOfExperience" | "phoneNumber";
@@ -127,18 +127,26 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     <TooltipProvider>
-                      {advocate.specialties.map((specialty) => (
-                        <Tooltip key={specialty}>
-                          <TooltipTrigger asChild>
-                            <span
-                              className={`${getSpecialtyColor(specialty)} w-3 h-3 rounded-full`}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="font-mono">{specialty}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
+                      {(advocate.specialties || []).map((specialty) => {
+                        const { color, title, description } = getSpecialtyInfo(specialty);
+                        return (
+                          <Tooltip key={specialty}>
+                            <TooltipTrigger asChild>
+                              <span
+                                className={`${color} w-3 h-3 rounded-full`}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="flex flex-col gap-1">
+                                <p className="font-mono">{title}</p>
+                                {description && (
+                                  <p className="text-sm text-muted-foreground">{description}</p>
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
                     </TooltipProvider>
                   </div>
                 </TableCell>
