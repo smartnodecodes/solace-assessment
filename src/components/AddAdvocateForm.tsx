@@ -116,6 +116,7 @@ export default function AddAdvocateForm({ onClose }: { onClose: () => void }) {
             id="yearsOfExperience"
             type="number"
             min="0"
+            max="100"
             value={formData.yearsOfExperience}
             onChange={(e) => setFormData({ ...formData, yearsOfExperience: e.target.value })}
             required
@@ -148,7 +149,7 @@ export default function AddAdvocateForm({ onClose }: { onClose: () => void }) {
                 key={specialty}
                 value={specialty}
                 size="sm"
-                className={`${color} p-1 text-xs text-white data-[state=on]:opacity-100 data-[state=off]:opacity-50 hover:text-white hover:bg-primary transition-opacity duration-300`}
+                className={`${color} p-1 h-6 text-xs text-white data-[state=on]:opacity-100 data-[state=off]:opacity-50 hover:text-white hover:bg-primary transition-opacity duration-300`}
               >
                 {title}
               </ToggleGroupItem>

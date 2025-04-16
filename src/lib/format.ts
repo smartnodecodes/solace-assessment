@@ -44,7 +44,7 @@ export const ALL_SPECIALTIES = [
   'Allergy and Immunology (Allergy Treatment)',
   'Geriatrics (Elderly Health)',
   'Emergency Medicine (Emergency Care)'
-] as const;
+];
 
 export type Specialty = typeof ALL_SPECIALTIES[number];
 
@@ -62,7 +62,6 @@ export function getSpecialtyInfo(specialty: Specialty) {
 export function formatPhoneNumber(phoneNumber: string | number | null | undefined): string {
   if (!phoneNumber) return "";
   
-  // Convert to string if it's a number
   const phoneString = String(phoneNumber);
   const cleaned = phoneString.replace(/\D/g, "");
   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);

@@ -12,7 +12,7 @@ const mollie = LocalFont({
 import useAdvocates from "@/hooks/useAdvocates";
 
 import SearchFilters from "@/components/SearchFilters";
-import SpecialitiesFilter from "@/components/SpecialitiesFilter";
+import SpecialtiesFilter from "@/components/SpecialtiesFilter";
 import AdvocatesTable from "@/components/AdvocatesTable";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,7 +58,7 @@ export default function Home() {
               </Button>
             </DrawerTrigger>
             <DrawerContent>
-              <SpecialitiesFilter
+              <SpecialtiesFilter
                 advocates={advocates}
                 onFilterChange={setSpecialtyFilteredAdvocates}
               />
