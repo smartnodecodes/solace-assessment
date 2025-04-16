@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import { useState, useEffect } from 'react';
 import type { Advocate } from '@/types/global';
 import { ALL_SPECIALTIES } from '@/lib/format';
 
@@ -17,29 +18,27 @@ interface ApiResponse {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function useAdvocates(page: number = 1, limit: number = 10) {
-  const { data, error, isLoading, mutate } = useSWR<ApiResponse>(`/api/advocates?page=${page}&limit=${limit}`, fetcher, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 60000,
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-  // Log unknown specialties
-  if (data?.data) {
-    const allSpecialties = new Set<string>();
-    data.data.forEach(advocate => {
-      advocate.specialties?.forEach(specialty => {
-        allSpecialties.add(specialty);
-      });
-    });
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // 300ms debounce
 
-    const unknownSpecialties = Array.from(allSpecialties).filter(
-      specialty => !ALL_SPECIALTIES.includes(specialty as any)
-    );
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-    if (unknownSpecialties.length > 0) {
-      console.log('Unknown specialties found in database:', unknownSpecialties);
+  const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
+    `/api/advocates?page=${page}&limit=${limit}&search=${encodeURIComponent(debouncedSearchTerm)}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000,
     }
-  }
+  );
 
   const createAdvocate = async (advocateData: Omit<Advocate, 'id'>) => {
     try {
@@ -89,5 +88,7 @@ export default function useAdvocates(page: number = 1, limit: number = 10) {
     loading: isLoading,
     error,
     createAdvocate,
+    searchTerm,
+    setSearchTerm,
   };
 }

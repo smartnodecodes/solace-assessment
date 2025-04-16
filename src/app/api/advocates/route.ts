@@ -1,58 +1,56 @@
-
 import { NextResponse, NextRequest } from "next/server";
 import db from "@/db";
 import { advocates } from "@/db/schema";
 import { ALL_SPECIALTIES } from "@/lib/format";
 import { sql } from "drizzle-orm";
-// import { advocateData } from "../../../db/seed/advocates";
+import type { Advocate } from "@/types/global";
 
 interface DbAdvocate {
-  id: string;
-  payload: string[];
-  [key: string]: any;
+  id: number;
+  payload: string[] | null;
+  first_name: string;
+  last_name: string;
+  city: string;
+  degree: string;
+  years_of_experience: number;
+  phone_number: number;
+  created_at: Date | null;
 }
 
 export async function GET(request: NextRequest) {
   try {    
-    if (!process.env.DATABASE_URL) {
-      console.error("DATABASE_URL is not set");
-      return NextResponse.json(
-        { error: "Database configuration error" },
-        { status: 500 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('search') || '';
     const offset = (page - 1) * limit;
 
+    // Build the search query
+    let whereClause = '';
+    if (search) {
+      const searchTerm = `'%${search}%'`;
+      whereClause = `WHERE CONCAT(first_name, last_name, ' ', city, ' ', degree) ILIKE ${searchTerm}`;
+    } else {
+      whereClause = '';
+    }
+
     // Get total count
-    const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(advocates);
-    
-    console.log("Count:", count);
+    const [{ count }] = await db.execute(sql`
+      SELECT COUNT(*) as count
+      FROM advocates
+      ${sql.raw(whereClause)}
+    `);
 
     const totalPages = Math.ceil(Number(count) / limit);
 
     // Get paginated data
-    const data = await db.select().from(advocates).limit(limit).offset(offset) as DbAdvocate[];
-
-    const allSpecialties = new Set<string>();
-    data.forEach(advocate => {
-      (advocate.payload || []).forEach((specialty: string) => {
-        allSpecialties.add(specialty);
-      });
-    });
-
-    console.log("All specialties:", allSpecialties);
-
-    const unknownSpecialties = Array.from(allSpecialties).filter(
-      specialty => !ALL_SPECIALTIES.includes(specialty as any)
-    );
-
-    if (unknownSpecialties.length > 0) {
-      console.log("Unknown specialties found in database:", unknownSpecialties);
-    }
+    const data = (await db.execute(sql`
+      SELECT *
+      FROM advocates
+      ${sql.raw(whereClause)}
+      LIMIT ${limit}
+      OFFSET ${offset}
+    `)) as unknown as DbAdvocate[];
 
     if (!data || data.length === 0) {
       console.log("No advocates found in database");
@@ -67,11 +65,31 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Transform the data to match the expected format
-    const transformedData = data.map(advocate => ({
-      ...advocate,
-      specialties: advocate.payload || [],
-    }));
+    // Transform the data to match the Advocate type
+    const transformedData: Advocate[] = data.map(advocate => {
+      // Ensure payload is properly parsed and is an array
+      let specialties: string[] = [];
+      try {
+        if (typeof advocate.payload === 'string') {
+          specialties = JSON.parse(advocate.payload);
+        } else if (Array.isArray(advocate.payload)) {
+          specialties = advocate.payload;
+        }
+      } catch (e) {
+        console.error('Error parsing specialties:', e);
+      }
+
+      return {
+        id: advocate.id,
+        firstName: advocate.first_name,
+        lastName: advocate.last_name,
+        city: advocate.city,
+        degree: advocate.degree,
+        specialties,
+        yearsOfExperience: advocate.years_of_experience,
+        phoneNumber: advocate.phone_number.toString(),
+      };
+    });
 
     return NextResponse.json({ 
       data: transformedData,
@@ -104,17 +122,45 @@ export async function POST(request: Request) {
       );
     }
 
-    const [newAdvocate] = await db.insert(advocates).values({
-      firstName,
-      lastName,
-      city,
-      degree,
-      payload: specialties,
-      yearsOfExperience,
-      phoneNumber: phoneNumber || null,
-    }).returning();
+    // Ensure specialties is properly formatted as a JSON array
+    const payload = Array.isArray(specialties) ? specialties : [specialties];
 
-    return NextResponse.json({ data: newAdvocate }, { status: 201 });
+    const [newAdvocate] = (await db.execute(sql`
+      INSERT INTO advocates (
+        first_name,
+        last_name,
+        city,
+        degree,
+        payload,
+        years_of_experience,
+        phone_number
+      ) VALUES (
+        ${firstName},
+        ${lastName},
+        ${city},
+        ${degree},
+        ${JSON.stringify(payload)},
+        ${yearsOfExperience},
+        ${parseInt(phoneNumber) || null}
+      )
+      RETURNING *
+    `)) as unknown as DbAdvocate[];
+
+    // Transform the data to match the Advocate type
+    const transformedAdvocate: Advocate = {
+      id: newAdvocate.id,
+      firstName: newAdvocate.first_name,
+      lastName: newAdvocate.last_name,
+      city: newAdvocate.city,
+      degree: newAdvocate.degree,
+      specialties: Array.isArray(newAdvocate.payload) ? newAdvocate.payload : [],
+      yearsOfExperience: newAdvocate.years_of_experience,
+      phoneNumber: newAdvocate.phone_number.toString(),
+    };
+
+    return NextResponse.json({ 
+      data: transformedAdvocate
+    }, { status: 201 });
   } catch (error) {
     console.error("Error creating advocate:", error);
     return NextResponse.json(

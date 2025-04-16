@@ -27,21 +27,18 @@ import type { Advocate } from "@/types/global";
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchFilteredAdvocates, setSearchFilteredAdvocates] = useState<Advocate[]>([]);
   const [specialtyFilteredAdvocates, setSpecialtyFilteredAdvocates] = useState<Advocate[]>([]);
-  const { advocates, pagination, loading } = useAdvocates(currentPage);
+  const { advocates, pagination, loading, searchTerm, setSearchTerm } = useAdvocates(currentPage);
 
   useEffect(() => {
-    setSearchFilteredAdvocates(advocates);
     setSpecialtyFilteredAdvocates(advocates);
   }, [advocates]);
 
   const finalFilteredAdvocates = useMemo(() => {
     return advocates.filter(advocate =>
-      searchFilteredAdvocates.includes(advocate) &&
       specialtyFilteredAdvocates.includes(advocate)
     );
-  }, [advocates, searchFilteredAdvocates, specialtyFilteredAdvocates]);
+  }, [advocates, specialtyFilteredAdvocates]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -53,8 +50,8 @@ export default function Home() {
         <h1 className={`${mollie.className} text-3xl text-white`}>Solace Advocates</h1>
         <div className="flex items-start gap-2">
           <SearchFilters
-            advocates={advocates}
-            onFilterChange={setSearchFilteredAdvocates}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
           />
           <Drawer>
             <DrawerTrigger asChild>
