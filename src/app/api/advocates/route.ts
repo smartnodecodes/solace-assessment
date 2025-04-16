@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+
+import { NextResponse, NextRequest } from "next/server";
 import db from "@/db";
 import { advocates } from "@/db/schema";
 import { ALL_SPECIALTIES } from "@/lib/format";
+import { sql } from "drizzle-orm";
 // import { advocateData } from "../../../db/seed/advocates";
 
 interface DbAdvocate {
@@ -10,7 +12,7 @@ interface DbAdvocate {
   [key: string]: any;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {    
     if (!process.env.DATABASE_URL) {
       console.error("DATABASE_URL is not set");
@@ -20,7 +22,20 @@ export async function GET() {
       );
     }
 
-    const data = await db.select().from(advocates) as DbAdvocate[];
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = (page - 1) * limit;
+
+    // Get total count
+    const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(advocates);
+    
+    console.log("Count:", count);
+
+    const totalPages = Math.ceil(Number(count) / limit);
+
+    // Get paginated data
+    const data = await db.select().from(advocates).limit(limit).offset(offset) as DbAdvocate[];
 
     const allSpecialties = new Set<string>();
     data.forEach(advocate => {
@@ -32,7 +47,7 @@ export async function GET() {
     console.log("All specialties:", allSpecialties);
 
     const unknownSpecialties = Array.from(allSpecialties).filter(
-      specialty => !ALL_SPECIALTIES.includes(specialty)
+      specialty => !ALL_SPECIALTIES.includes(specialty as any)
     );
 
     if (unknownSpecialties.length > 0) {
@@ -41,7 +56,15 @@ export async function GET() {
 
     if (!data || data.length === 0) {
       console.log("No advocates found in database");
-      return NextResponse.json({ data: [] });
+      return NextResponse.json({ 
+        data: [],
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalItems: Number(count),
+          itemsPerPage: limit
+        }
+      });
     }
 
     // Transform the data to match the expected format
@@ -50,7 +73,15 @@ export async function GET() {
       specialties: advocate.payload || [],
     }));
 
-    return NextResponse.json({ data: transformedData });
+    return NextResponse.json({ 
+      data: transformedData,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: Number(count),
+        itemsPerPage: limit
+      }
+    });
   } catch (error) {
     console.error("Error fetching advocates:", error);
     return NextResponse.json(

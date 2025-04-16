@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ChevronUp, ChevronDown, ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,7 +19,22 @@ import { formatPhoneNumber, getSpecialtyInfo, Specialty } from "@/lib/format";
 type SortDirection = "asc" | "desc" | null;
 type SortableColumn = "firstName" | "lastName" | "city" | "degree" | "yearsOfExperience" | "phoneNumber";
 
-export default function AdvocatesTable({ advocates }: { advocates: Advocate[] }) {
+interface PaginationData {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+}
+
+export default function AdvocatesTable({
+  advocates,
+  pagination,
+  onPageChange
+}: {
+  advocates: Advocate[];
+  pagination: PaginationData;
+  onPageChange: (page: number) => void;
+}) {
   const [sortColumn, setSortColumn] = useState<SortableColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -62,9 +77,35 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Advocates</CardTitle>
-          <CardDescription>Showing {advocates.length} advocates</CardDescription>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col">
+            <CardTitle>Advocates</CardTitle>
+            <CardDescription>
+              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} entries
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(pagination.currentPage - 1)}
+              disabled={pagination.currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="text-sm">
+              Page {pagination.currentPage} of {pagination.totalPages}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -127,7 +168,7 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
                 onClick={() => handleSort("yearsOfExperience")}
               >
                 <div className="flex items-center gap-1">
-                  Experience
+                  Years of Experience
                   <SortIcon column="yearsOfExperience" />
                 </div>
               </TableHead>
@@ -158,15 +199,15 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
                           <Tooltip key={specialty}>
                             <TooltipTrigger asChild>
                               <span
-                                className={`${color} w-3 h-3 rounded-full inline-block`}
+                                className={`${color} w-3 h-3 rounded-full inline-block cursor-pointer`}
                                 aria-label={title}
                               />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <div className="flex flex-col gap-1">
-                                <p className="font-mono">{title}</p>
+                              <div className="flex flex-col gap-1 text-xs">
+                                <p className="font-bold">{title}</p>
                                 {description && (
-                                  <p className="text-sm text-muted-foreground">{description}</p>
+                                  <p className="text-muted-foreground">{description}</p>
                                 )}
                               </div>
                             </TooltipContent>
@@ -176,7 +217,7 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
                     </TooltipProvider>
                   </div>
                 </TableCell>
-                <TableCell className={`font-mono ${sortColumn === "yearsOfExperience" ? "bg-blue-100" : ""}`}>{advocate.yearsOfExperience} year{advocate.yearsOfExperience === 1 ? "" : "s"}</TableCell>
+                <TableCell className={`font-mono ${sortColumn === "yearsOfExperience" ? "bg-blue-100" : ""}`}>{advocate.yearsOfExperience}</TableCell>
                 <TableCell className={`font-mono ${sortColumn === "phoneNumber" ? "bg-blue-100" : ""}`}>{formatPhoneNumber(advocate.phoneNumber || "")}</TableCell>
               </TableRow>
             )) : (
@@ -187,6 +228,6 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
           </TableBody>
         </Table>
       </CardContent>
-    </Card>
+    </Card >
   );
 }

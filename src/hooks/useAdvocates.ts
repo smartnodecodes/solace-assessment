@@ -2,10 +2,22 @@ import useSWR from 'swr';
 import type { Advocate } from '@/types/global';
 import { ALL_SPECIALTIES } from '@/lib/format';
 
+interface PaginationData {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+}
+
+interface ApiResponse {
+  data: Advocate[];
+  pagination: PaginationData;
+}
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function useAdvocates() {
-  const { data, error, isLoading, mutate } = useSWR<{ data: Advocate[] }>('/api/advocates', fetcher, {
+export default function useAdvocates(page: number = 1, limit: number = 10) {
+  const { data, error, isLoading, mutate } = useSWR<ApiResponse>(`/api/advocates?page=${page}&limit=${limit}`, fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     dedupingInterval: 60000,
@@ -47,7 +59,15 @@ export default function useAdvocates() {
       
       // Update the local data with the new advocate
       mutate(
-        { data: [...(data?.data || []), newAdvocate.data] },
+        { 
+          data: [...(data?.data || []), newAdvocate.data],
+          pagination: data?.pagination || {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: 1,
+            itemsPerPage: limit
+          }
+        },
         { revalidate: false }
       );
 
@@ -60,6 +80,12 @@ export default function useAdvocates() {
 
   return {
     advocates: data?.data || [],
+    pagination: data?.pagination || {
+      currentPage: page,
+      totalPages: 1,
+      totalItems: 0,
+      itemsPerPage: limit
+    },
     loading: isLoading,
     error,
     createAdvocate,

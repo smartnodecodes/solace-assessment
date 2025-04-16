@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import LocalFont from "next/font/local";
-import { Loader2, Filter, Plus } from "lucide-react";
+import { Loader2, Filter } from "lucide-react";
 
 const mollie = LocalFont({
   src: "../../public/mollie-glaston.otf",
@@ -14,15 +14,7 @@ import useAdvocates from "@/hooks/useAdvocates";
 import SearchFilters from "@/components/SearchFilters";
 import SpecialitiesFilter from "@/components/SpecialitiesFilter";
 import AdvocatesTable from "@/components/AdvocatesTable";
-import AddAdvocateForm from "@/components/AddAdvocateForm";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
@@ -34,9 +26,10 @@ import {
 import type { Advocate } from "@/types/global";
 
 export default function Home() {
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchFilteredAdvocates, setSearchFilteredAdvocates] = useState<Advocate[]>([]);
   const [specialtyFilteredAdvocates, setSpecialtyFilteredAdvocates] = useState<Advocate[]>([]);
-  const { advocates, loading } = useAdvocates();
+  const { advocates, pagination, loading } = useAdvocates(currentPage);
 
   useEffect(() => {
     setSearchFilteredAdvocates(advocates);
@@ -49,6 +42,10 @@ export default function Home() {
       specialtyFilteredAdvocates.includes(advocate)
     );
   }, [advocates, searchFilteredAdvocates, specialtyFilteredAdvocates]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
   return (
     <main className="m-4">
@@ -80,7 +77,11 @@ export default function Home() {
           <Loader2 className="w-10 h-10 animate-spin" />
         </div>
       ) : (
-        <AdvocatesTable advocates={finalFilteredAdvocates} />
+        <AdvocatesTable 
+          advocates={finalFilteredAdvocates} 
+          pagination={pagination}
+          onPageChange={handlePageChange}
+        />
       )}
     </main>
   );
