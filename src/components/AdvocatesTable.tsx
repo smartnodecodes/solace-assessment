@@ -118,12 +118,12 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedAdvocates.map((advocate) => (
+            {sortedAdvocates.length > 0 ? sortedAdvocates.map((advocate) => (
               <TableRow key={advocate.id}>
-                <TableCell className={`${sortColumn === "firstName" ? "bg-blue-300/50" : ""}`}>{advocate.firstName}</TableCell>
-                <TableCell className={`${sortColumn === "lastName" ? "bg-blue-300/50" : ""}`}>{advocate.lastName}</TableCell>
-                <TableCell className={`${sortColumn === "city" ? "bg-blue-300/50" : ""}`}>{advocate.city}</TableCell>
-                <TableCell className={`${sortColumn === "degree" ? "bg-blue-300/50" : ""}`}>{advocate.degree}</TableCell>
+                <TableCell className={`font-mono ${sortColumn === "firstName" ? "bg-blue-100" : ""}`}>{advocate.firstName}</TableCell>
+                <TableCell className={`font-mono ${sortColumn === "lastName" ? "bg-blue-100" : ""}`}>{advocate.lastName}</TableCell>
+                <TableCell className={`font-mono ${sortColumn === "city" ? "bg-blue-100" : ""}`}>{advocate.city}</TableCell>
+                <TableCell className={`font-mono ${sortColumn === "degree" ? "bg-blue-100" : ""}`}>{advocate.degree}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     <TooltipProvider>
@@ -135,17 +135,21 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
                             />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{specialty}</p>
+                            <p className="font-mono">{specialty}</p>
                           </TooltipContent>
                         </Tooltip>
                       ))}
                     </TooltipProvider>
                   </div>
                 </TableCell>
-                <TableCell className={`${sortColumn === "yearsOfExperience" ? "bg-blue-300/50" : ""}`}>{advocate.yearsOfExperience}</TableCell>
-                <TableCell className={`${sortColumn === "phoneNumber" ? "bg-blue-300/50" : ""}`}>{formatPhoneNumber(advocate.phoneNumber || "")}</TableCell>
+                <TableCell className={`font-mono ${sortColumn === "yearsOfExperience" ? "bg-blue-100" : ""}`}>{advocate.yearsOfExperience}</TableCell>
+                <TableCell className={`font-mono ${sortColumn === "phoneNumber" ? "bg-blue-100" : ""}`}>{formatPhoneNumber(advocate.phoneNumber || "")}</TableCell>
               </TableRow>
-            ))}
+            )) : (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center">No advocates found</TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>

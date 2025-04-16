@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-
+import LocalFont  from "next/font/local";
 import { Loader2 } from "lucide-react";
+
+const mollie = LocalFont({
+  src: "../../public/mollie-glaston.otf",
+  display: "swap",
+});
 
 import useAdvocates from "@/hooks/useAdvocates";
 
@@ -31,14 +36,18 @@ export default function Home() {
 
   return (
     <main className="m-4">
-      <h1 className="text-2xl font-bold mb-4">Solace Advocates</h1>
-      
-      <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between mb-2">
+      <h1 className={`${mollie.className} text-3xl text-white mb-4`}>Solace Advocates</h1>
         <SearchFilters 
           advocates={advocates} 
           onFilterChange={setSearchFilteredAdvocates} 
         />
-        
+      </div>
+
+      
+      <div className="space-y-6">
+
+      
         <SpecialitiesFilter
           advocates={advocates}
           onFilterChange={setSpecialtyFilteredAdvocates}

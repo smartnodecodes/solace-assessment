@@ -34,18 +34,14 @@ export default function SearchFilters({
   }, [searchTerm, advocates, onFilterChange]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Search Advocates</CardTitle>
-        <CardDescription>Search for advocates by name, city, degree, or specialty</CardDescription>
-      </CardHeader>
-      <CardContent className="flex gap-2">
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
         <Input
           type="text"
           placeholder="Search advocates..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
+          className="max-w-sm bg-white text-black/90"
         />
         <Button
           variant="outline"
@@ -53,7 +49,8 @@ export default function SearchFilters({
         >
           Reset
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+      <p className="text-sm text-muted">Search for advocates by name, city, degree, or specialty</p>
+    </div>
   );
 }
