@@ -127,7 +127,7 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
                 onClick={() => handleSort("yearsOfExperience")}
               >
                 <div className="flex items-center gap-1">
-                  Years of Experience
+                  Experience
                   <SortIcon column="yearsOfExperience" />
                 </div>
               </TableHead>
@@ -176,7 +176,7 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
                     </TooltipProvider>
                   </div>
                 </TableCell>
-                <TableCell className={`font-mono ${sortColumn === "yearsOfExperience" ? "bg-blue-100" : ""}`}>{advocate.yearsOfExperience}</TableCell>
+                <TableCell className={`font-mono ${sortColumn === "yearsOfExperience" ? "bg-blue-100" : ""}`}>{advocate.yearsOfExperience} year{advocate.yearsOfExperience === 1 ? "" : "s"}</TableCell>
                 <TableCell className={`font-mono ${sortColumn === "phoneNumber" ? "bg-blue-100" : ""}`}>{formatPhoneNumber(advocate.phoneNumber || "")}</TableCell>
               </TableRow>
             )) : (

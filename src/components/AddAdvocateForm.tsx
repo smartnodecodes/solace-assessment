@@ -148,8 +148,7 @@ export default function AddAdvocateForm({ onClose }: { onClose: () => void }) {
                 key={specialty}
                 value={specialty}
                 size="sm"
-                variant="outline"
-                className={`${color} text-white data-[state=on]:opacity-100 data-[state=off]:opacity-50 hover:text-white hover:bg-primary transition-opacity`}
+                className={`${color} p-1 text-xs text-white data-[state=on]:opacity-100 data-[state=off]:opacity-50 hover:text-white hover:bg-primary transition-opacity duration-300`}
               >
                 {title}
               </ToggleGroupItem>
