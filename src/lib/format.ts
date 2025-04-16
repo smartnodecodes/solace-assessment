@@ -1,7 +1,7 @@
 export const formatPhoneNumber = (phoneNumber: string | number) => {
-    if (!phoneNumber) return "";
-    const phoneString = phoneNumber.toString().replace(/\D/g, '');
-    return phoneString.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+  if (!phoneNumber) return "";
+  const phoneString = phoneNumber.toString().replace(/\D/g, "");
+  return phoneString.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
 };
 
 export const COLOR_PALETTE = [
@@ -13,12 +13,16 @@ export const COLOR_PALETTE = [
   "bg-teal-500 hover:bg-teal-600",
   "bg-indigo-500 hover:bg-indigo-600",
   "bg-rose-500 hover:bg-rose-600",
+  "bg-yellow-500 hover:bg-yellow-600",
+  "bg-red-500 hover:bg-red-600",
+  "bg-gray-500 hover:bg-gray-600",
+  "bg-lime-500 hover:bg-lime-600",
+  "bg-cyan-500 hover:bg-cyan-600",
+  "bg-fuchsia-500 hover:bg-fuchsia-600",
+  "bg-violet-500 hover:bg-violet-600",
+  "bg-amber-500 hover:bg-amber-600",
+  "bg-emerald-500 hover:bg-emerald-600",
 ] as const;
-
-export const getSpecialtyColor = (specialty: string) => {
-  const specialtyIndex = ALL_SPECIALTIES.indexOf(specialty);
-  return COLOR_PALETTE[specialtyIndex % COLOR_PALETTE.length];
-};
 
 export const ALL_SPECIALTIES = [
   "Bipolar",
@@ -47,4 +51,9 @@ export const ALL_SPECIALTIES = [
   "Schizophrenia and psychotic disorders",
   "Learning disorders",
   "Domestic abuse",
-] as const;
+];
+
+export const getSpecialtyColor = (specialty: string) => {
+  const specialtyIndex = ALL_SPECIALTIES.indexOf(specialty);
+  return COLOR_PALETTE[specialtyIndex % COLOR_PALETTE.length];
+};

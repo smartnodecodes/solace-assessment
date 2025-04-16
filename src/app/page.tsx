@@ -17,13 +17,11 @@ export default function Home() {
   const [specialtyFilteredAdvocates, setSpecialtyFilteredAdvocates] = useState<Advocate[]>([]);
   const { advocates, loading } = useAdvocates();
 
-  // Initialize both filtered lists with all advocates
   useEffect(() => {
     setSearchFilteredAdvocates(advocates);
     setSpecialtyFilteredAdvocates(advocates);
   }, [advocates]);
 
-  // Combine both filters
   const finalFilteredAdvocates = useMemo(() => {
     return advocates.filter(advocate => 
       searchFilteredAdvocates.includes(advocate) && 
@@ -47,7 +45,7 @@ export default function Home() {
         />
         
         {loading ? (
-          <div className="flex items-center justify-center h-screen">
+          <div className="flex items-center justify-center h-screen text-white">
             <Loader2 className="w-10 h-10 animate-spin" />
           </div>
         ) : (
