@@ -192,7 +192,7 @@ export default function AdvocatesTable({
                 <TableCell className={`font-mono ${sortColumn === "degree" ? "bg-blue-100" : ""}`}>{advocate.degree}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    <TooltipProvider>
+                    <TooltipProvider delayDuration={100}>
                       {(advocate.specialties || []).map((specialty) => {
                         const { color, title, description } = getSpecialtyInfo(specialty as Specialty);
                         return (
@@ -203,7 +203,7 @@ export default function AdvocatesTable({
                                 aria-label={title}
                               />
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent side="top" className="max-w-[200px]">
                               <div className="flex flex-col gap-1 text-xs">
                                 <p className="font-bold">{title}</p>
                                 {description && (
