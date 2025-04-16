@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 import type { Advocate } from "@/types/global";
-
 
 export default function SearchFilters({
   advocates,

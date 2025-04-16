@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import LocalFont from "next/font/local";
-import { Loader2, Filter } from "lucide-react";
+import { Loader2, Filter, Plus } from "lucide-react";
 
 const mollie = LocalFont({
   src: "../../public/mollie-glaston.otf",
@@ -14,7 +14,15 @@ import useAdvocates from "@/hooks/useAdvocates";
 import SearchFilters from "@/components/SearchFilters";
 import SpecialitiesFilter from "@/components/SpecialitiesFilter";
 import AdvocatesTable from "@/components/AdvocatesTable";
+import AddAdvocateForm from "@/components/AddAdvocateForm";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,

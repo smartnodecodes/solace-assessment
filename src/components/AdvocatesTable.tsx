@@ -2,11 +2,19 @@ import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import AddAdvocateForm from "@/components/AddAdvocateForm";
 
 import type { Advocate } from "@/types/global";
-
-import { formatPhoneNumber, getSpecialtyInfo } from "@/lib/format";
+import { formatPhoneNumber, getSpecialtyInfo, Specialty } from "@/lib/format";
 
 type SortDirection = "asc" | "desc" | null;
 type SortableColumn = "firstName" | "lastName" | "city" | "degree" | "yearsOfExperience" | "phoneNumber";
@@ -14,6 +22,7 @@ type SortableColumn = "firstName" | "lastName" | "city" | "degree" | "yearsOfExp
 export default function AdvocatesTable({ advocates }: { advocates: Advocate[] }) {
   const [sortColumn, setSortColumn] = useState<SortableColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleSort = (column: SortableColumn) => {
     if (sortColumn === column) {
@@ -52,9 +61,25 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Advocates</CardTitle>
-        <CardDescription>Showing {advocates.length} advocates</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Advocates</CardTitle>
+          <CardDescription>Showing {advocates.length} advocates</CardDescription>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Advocate
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Advocate</DialogTitle>
+            </DialogHeader>
+            <AddAdvocateForm onClose={() => setIsDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </CardHeader>
       <CardContent>
         <Table>
@@ -128,12 +153,13 @@ export default function AdvocatesTable({ advocates }: { advocates: Advocate[] })
                   <div className="flex flex-wrap gap-1">
                     <TooltipProvider>
                       {(advocate.specialties || []).map((specialty) => {
-                        const { color, title, description } = getSpecialtyInfo(specialty);
+                        const { color, title, description } = getSpecialtyInfo(specialty as Specialty);
                         return (
                           <Tooltip key={specialty}>
                             <TooltipTrigger asChild>
                               <span
-                                className={`${color} w-3 h-3 rounded-full`}
+                                className={`${color} w-3 h-3 rounded-full inline-block`}
+                                aria-label={title}
                               />
                             </TooltipTrigger>
                             <TooltipContent>
