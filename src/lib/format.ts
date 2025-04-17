@@ -16,7 +16,7 @@ export const COLOR_PALETTE = [
   "bg-violet-500",
   "bg-amber-500",
   "bg-emerald-500",
-] as const;
+];
 
 export const ALL_SPECIALTIES = [
   'Personal growth',

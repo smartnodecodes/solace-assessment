@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState } from "react";
 import LocalFont from "next/font/local";
 import { Loader2, Filter } from "lucide-react";
 
@@ -21,22 +21,10 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-import type { Advocate } from "@/types/global";
-
 export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [specialtyFilteredAdvocates, setSpecialtyFilteredAdvocates] = useState<Advocate[]>([]);
-  const { advocates, pagination, loading, searchTerm, setSearchTerm } = useAdvocates(currentPage);
-
-  useEffect(() => {
-    setSpecialtyFilteredAdvocates(advocates);
-  }, [advocates]);
-
-  const finalFilteredAdvocates = useMemo(() => {
-    return advocates.filter(advocate =>
-      specialtyFilteredAdvocates.includes(advocate)
-    );
-  }, [advocates, specialtyFilteredAdvocates]);
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+  const { advocates, pagination, loading, searchTerm, setSearchTerm } = useAdvocates(currentPage, 10, selectedSpecialties);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -53,14 +41,20 @@ export default function Home() {
           />
           <Drawer>
             <DrawerTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="relative">
+                {selectedSpecialties.length > 0 && (
+                  <span className="absolute -top-2 -right-2 h-4 w-4 bg-red-500 rounded-full text-xs text-gray-300">
+                    {selectedSpecialties.length}
+                  </span>
+                )}
                 <Filter className="h-4 w-4" />
+
               </Button>
             </DrawerTrigger>
             <DrawerContent>
               <SpecialtiesFilter
-                advocates={advocates}
-                onFilterChange={setSpecialtyFilteredAdvocates}
+                selectedSpecialties={selectedSpecialties}
+                onSpecialtiesChange={setSelectedSpecialties}
               />
             </DrawerContent>
           </Drawer>
@@ -72,8 +66,8 @@ export default function Home() {
           <Loader2 className="w-10 h-10 animate-spin" />
         </div>
       ) : (
-        <AdvocatesTable 
-          advocates={finalFilteredAdvocates} 
+        <AdvocatesTable
+          advocates={advocates}
           pagination={pagination}
           onPageChange={handlePageChange}
         />

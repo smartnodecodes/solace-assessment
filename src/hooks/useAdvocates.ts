@@ -17,21 +17,20 @@ interface ApiResponse {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function useAdvocates(page: number = 1, limit: number = 10) {
+export default function useAdvocates(page: number = 1, limit: number = 10, selectedSpecialties: string[] = []) {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-  // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 300); // 300ms debounce
+    }, 300); 
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
-    `/api/advocates?page=${page}&limit=${limit}&search=${encodeURIComponent(debouncedSearchTerm)}`,
+    `/api/advocates?page=${page}&limit=${limit}&search=${encodeURIComponent(debouncedSearchTerm)}&specialties=${encodeURIComponent(JSON.stringify(selectedSpecialties))}`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -56,7 +55,6 @@ export default function useAdvocates(page: number = 1, limit: number = 10) {
 
       const newAdvocate = await response.json();
       
-      // Update the local data with the new advocate
       mutate(
         { 
           data: [...(data?.data || []), newAdvocate.data],

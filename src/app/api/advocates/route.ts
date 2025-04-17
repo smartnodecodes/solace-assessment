@@ -1,7 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
 import db from "@/db";
-import { advocates } from "@/db/schema";
-import { ALL_SPECIALTIES } from "@/lib/format";
 import { sql } from "drizzle-orm";
 import type { Advocate } from "@/types/global";
 
@@ -23,18 +21,30 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
+    const specialtiesParam = searchParams.get('specialties') || '[]';
+    const specialties = JSON.parse(specialtiesParam) as string[];
     const offset = (page - 1) * limit;
 
-    // Build the search query
     let whereClause = '';
+    const conditions = [];
+
     if (search) {
       const searchTerm = `'%${search}%'`;
-      whereClause = `WHERE CONCAT(first_name, last_name, ' ', city, ' ', degree) ILIKE ${searchTerm}`;
-    } else {
-      whereClause = '';
+      conditions.push(`CONCAT(first_name, last_name, ' ', city, ' ', degree) ILIKE ${searchTerm}`);
     }
 
-    // Get total count
+    if (specialties.length > 0) {
+      const specialtyConditions = specialties.map(specialty => {
+        const specialtyTerm = `'%${specialty}%'`;
+        return `payload::text ILIKE ${specialtyTerm}`;
+      });
+      conditions.push(`(${specialtyConditions.join(' AND ')})`);
+    }
+
+    if (conditions.length > 0) {
+      whereClause = `WHERE ${conditions.join(' AND ')}`;
+    }
+
     const [{ count }] = await db.execute(sql`
       SELECT COUNT(*) as count
       FROM advocates
@@ -43,7 +53,6 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil(Number(count) / limit);
 
-    // Get paginated data
     const data = (await db.execute(sql`
       SELECT *
       FROM advocates
@@ -65,9 +74,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Transform the data to match the Advocate type
     const transformedData: Advocate[] = data.map(advocate => {
-      // Ensure payload is properly parsed and is an array
       let specialties: string[] = [];
       try {
         if (typeof advocate.payload === 'string') {
@@ -114,7 +121,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { firstName, lastName, city, degree, specialties, yearsOfExperience, phoneNumber } = body;
 
-    // Validate required fields
     if (!firstName || !lastName || !city || !degree || !specialties || !yearsOfExperience) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -122,7 +128,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Ensure specialties is properly formatted as a JSON array
     const payload = Array.isArray(specialties) ? specialties : [specialties];
 
     const [newAdvocate] = (await db.execute(sql`
@@ -146,7 +151,6 @@ export async function POST(request: Request) {
       RETURNING *
     `)) as unknown as DbAdvocate[];
 
-    // Transform the data to match the Advocate type
     const transformedAdvocate: Advocate = {
       id: newAdvocate.id,
       firstName: newAdvocate.first_name,
